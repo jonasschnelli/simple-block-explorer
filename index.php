@@ -9,7 +9,7 @@ ini_set('display_errors', 1);
   define("BASE_URL", "/explorer/");
   define("USE_MOD_REWRITE", true);
   // enable mod rewrite mode to have nice URLs like /block/<hash> instead of index.php?block=<hash>
-  $FOOTER = '<a href="https://github.com/jonasschnelli/dumbblockexplorer">Dumb Block Explorer</a> for Bitcoin Core';
+  $FOOTER = '<a href="https://github.com/jonasschnelli/dumb-block-explorer">Dumb Block Explorer</a> for Bitcoin Core';
   $TITLE = "Dumb Block Explorer";
 ###### END CONFIG SECTION
   $HTMLTITLE = $TITLE;
