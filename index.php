@@ -60,6 +60,9 @@ ini_set('display_errors', 1);
       else if ($age_in_s > 60) {
         $lastblocks[count($lastblocks)-1]->age = gmdate("i", $age_in_s)." mins, ".gmdate("s", $age_in_s)." secs";
       }
+      else {
+        $lastblocks[count($lastblocks)-1]->age = "New block";
+      }
     }
     return $lastblocks;
   }
