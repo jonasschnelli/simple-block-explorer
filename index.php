@@ -21,6 +21,10 @@ ini_set('display_errors', 1);
   $VIEWTYPE = ViewType::Overview;
   if(isset($_REQUEST['search'])) {
     $search = clean($_REQUEST['search']);
+    if (is_numeric($search)) {
+      $blockhash = getBlockHashByHeight($search);
+      if (strlen($blockhash) == 64) { $search = $blockhash; }
+    }
     $block = getBlockJSON($search);
     $VIEWTYPE = ViewType::Block;
     if (isset($block->height)) { $HTMLTITLE = $TITLE.", height ".$block->height; }
@@ -77,6 +81,11 @@ ini_set('display_errors', 1);
       return $blocks[0];
     }
     return;
+  }
+  function getBlockHashByHeight($height) {
+    # requires https://github.com/bitcoin/bitcoin/pull/14353 (eventually in Core 0.18)
+    $blockhash = httpFetch("rest/blockhash/".$height.".json");
+    return $blockhash;
   }
   function getBlockJSON($hash) {
     $block = httpFetch("rest/block/notxdetails/$hash.json");
@@ -234,7 +243,7 @@ span.text-muted.spent {
       <h3 class="masthead-brand"><?php echo $TITLE; ?></h3>
       <nav class="nav nav-masthead justify-content-center">
         <form class="form-inline" action="">
-          <input class="form-control mr-sm-2" name="search" type="search" placeholder="Search hash" aria-label="Search">
+          <input class="form-control mr-sm-2" name="search" type="search" placeholder="Search hash or height" aria-label="Search">
         </form>
 <?php if(isset($TEST_ENDPOINT) && strlen($TEST_ENDPOINT) > 0): ?>
         <a class="nav-link <?php if($ENDPOINT == $TEST_ENDPOINT) echo "active"; ?>" href="<?php echo overviewlink(true); ?>">Testnet</a>
