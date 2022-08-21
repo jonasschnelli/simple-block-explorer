@@ -57,7 +57,7 @@ ini_set('display_errors', 1);
     for ($i=0;$i<$blk_count;$i++) {
       array_push($lastblocks, getBlockJSON($hash));
       $hash = $lastblocks[count($lastblocks)-1]->previousblockhash;
-      $age_in_s = $NOW - $lastblocks[count($lastblocks)-1]->time;
+      $age_in_s = $NOW - $lastblocks[count($lastblocks)-1]->mediantime;
       if ($age_in_s > 3600) {
         $lastblocks[count($lastblocks)-1]->age = gmdate("G", $age_in_s)." hours, ".gmdate("i", $age_in_s)." min";
       }
@@ -104,15 +104,15 @@ ini_set('display_errors', 1);
     if (isset($json->blockhash)) { $json->blockheader = getBlockHeader($json->blockhash); }
     $missing_prevout = false;
     foreach($json->vin as &$vin) {
-      if (isset($vin->txid)) {
+      if ($vin->txid) {
         $prevout = httpFetch("rest/tx/".$vin->txid.".json");
         if(isset($prevout)) {
           $vin->prevout = $prevout->vout[$vin->vout];
         } else { $missing_prevout = true; }
       }
     }
-    if (!$missing_prevout) {
-      $total_in = 0;
+        $total_in += $vin->prevout->value;
+      }
       foreach($json->vin as &$vin) {
         if (isset($vin->prevout)) {
           $total_in += $vin->prevout->value;
@@ -171,12 +171,10 @@ ini_set('display_errors', 1);
   <meta name="description" content="">
 <?php if($VIEWTYPE == ViewType::Overview): ?>  <meta http-equiv="refresh" content="60"/><?php endif;?>
 
-<!-- IE Edge Meta Tag -->
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-
-<!-- Viewport -->
-<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
+<!-- Optional Theme -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
 <!-- Minified CSS -->
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
 
@@ -296,11 +294,11 @@ span.text-muted.spent {
           <td><?php echo $block->height; ?></td>
         </tr>
         <tr>
-          <th>Hash <a class="copyicon" data-clipboard-target="#blockhash"><img src="https://cdnjs.cloudflare.com/ajax/libs/octicons/8.0.0/svg/clippy.svg" /></a></th>
+                   <td><?php echo $block->hash; ?></td>
           <td class="text-truncate"><span id="blockhash"><?php echo $block->hash; ?></span></td>
         </tr>
         <tr>
-          <th>Time</th>
+          <th>mediantime); </th>
           <td><?php echo date("Y-m-d H:i:s", $block->time); ?></td>
         </tr>
         <tr>
@@ -349,7 +347,11 @@ else:?>
   <div class="row">
     <table class="table table-bordered table-hover table-striped bg-white">
       <tbody>
+        <th>TXID</th>
+        <td><?php echo $tx->txid; ?></td>
+
       <tr>
+      
         <th>txid <a class="copyicon" data-clipboard-target="#txid"><img src="https://cdnjs.cloudflare.com/ajax/libs/octicons/8.0.0/svg/clippy.svg" /></a></th>
         <td><span id="txid"><?php echo $tx->txid; ?></a></td>
       </tr>
@@ -388,7 +390,7 @@ else:?>
       <?php if($tx->total_in > 0): ?>
       <tr>
         <th>Fee</th>
-        <td><?php if (isset($tx->fee)) echo btcamount($tx->fee); else echo "N/A"; ?></td>
+        <td><?php if (isset($tx->fee)) echo btcamount($tx->fee); else echo $tx->fee*100000000/$tx->vsize; else echo "N/A"; ?></td> "N/A"; ?></td>
       </tr>
       <tr>
         <th>Feerate</th>
@@ -420,7 +422,7 @@ else:?>
       <ul class="list-group">
 <?php foreach($tx->vout as $vout): ?>
         <li class="list-group-item lh-condensed<?php if (isset($_REQUEST['n']) && $_REQUEST['n'] == $vout->n) echo " active"; ?>">
-          <span class="badge badge-primary"><?php echo $vout->scriptPubKey->type; ?></span> <?php if (isset($vout->is_unspent)): ?><span class="badge badge-success">unspent</span><?php else: ?><span class="badge badge-warning">spent</span><?php endif; ?><div><h6><?php if (isset($vout->scriptPubKey->addresses)) echo $vout->scriptPubKey->addresses[0]; ?></h6><span class="text-muted<?php if (!isset($vout->is_unspent)) echo " spent"; ?>"><?php if ($vout->scriptPubKey->type != "nulldata") { echo btcamount($vout->value); } else { echo "<span style=\"font-size:0.7em;color:black !important;\">".$vout->scriptPubKey->asm."</span>"; }; ?></span></div>
+          <span class="badge badge-primary"><?php echo $vout->scriptPubKey->type; ?></span> <?php ($vout->value); ?></span></div>
         </li>
 <?php endforeach;?>
       </ul>
