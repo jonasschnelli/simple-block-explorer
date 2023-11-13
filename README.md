@@ -1,4 +1,4 @@
-Dumb Block Explorer
+Simple Block Explorer
 =====================================
 
 A trivial block explorer written in a single PHP file.
