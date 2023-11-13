@@ -8,7 +8,7 @@ $time_start = microtime(true);
 
   $MAIN_ENDPOINT = "http://127.0.0.1:8332/";
   $TEST_ENDPOINT = "http://127.0.0.1:18332/";
-  define("BASE_URL", "/explorer_test/");
+  define("BASE_URL", "/explorer/"); #set to absolute URL, use "/" if in root directory
   define("USE_MOD_REWRITE", true);
 	define("RPC_USER", "bitcoin");
 	define("RPC_PASS", "CHANGEME");
